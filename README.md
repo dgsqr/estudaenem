@@ -115,4 +115,5 @@ npm run lint
 ## Observações importantes
 
 - O histórico e o tema são persistidos no navegador com `localStorage`.
+- O aplicativo usa dados locais em JSON para as provas, porém o usuário pode fazer o uso do [API ENEM](https://enem.dev/) caso tenha preferencia.
 - O projeto foi pensado para estudo e revisão individual do conteúdo do Enem, com foco em praticidade e organização.
