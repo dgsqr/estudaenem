@@ -1,0 +1,100 @@
+@import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap");
+
+@theme {
+  /* fontes */
+  --font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  --font-body: "Work Sans", -apple-system, "Segoe UI", sans-serif;
+
+  /* fundos */
+  --color-paper: #edebe3;
+  --color-paper-alt: #e3e0d3;
+  --color-paper-raised: #f5f3ec;
+
+  /* tinta — texto */
+  --color-ink: #201f1b;
+  --color-ink-soft: #5a574d;
+  --color-ink-faint: #8b876f;
+
+  /* borda */
+  --color-rule: #c7c1ae;
+
+  /* seleção, acerto, ações primárias */
+  --color-stamp-light: #3cb587;
+  --color-stamp: #1f5e46;
+  --color-stamp-dark: #0d291e;
+  --color-stamp-ink: #f5f3ec;
+  --color-stamp-soft: color-mix(in srgb, #1f5e46 10%, transparent);
+
+  /* pendências, erros, contadores */
+  --color-flag: #a03b2c;
+  --color-flag-soft: color-mix(in srgb, #a03b2c 10%, transparent);
+}
+
+/* modo escuro */
+@layer base {
+  .dark {
+    --color-paper: #191815;
+    --color-paper-alt: #221f1a;
+    --color-paper-raised: #221f1a;
+
+    --color-ink: #ece9e0;
+    --color-ink-soft: #b1ab9a;
+    --color-ink-faint: #7c776a;
+
+    --color-rule: #423e34;
+
+    --color-stamp: #4fae83;
+    --color-stamp-ink: #12211b;
+    --color-stamp-soft: color-mix(in srgb, #4fae83 16%, transparent);
+
+    --color-flag: #e07b63;
+    --color-flag-soft: color-mix(in srgb, #e07b63 14%, transparent);
+  }
+}
+
+body {
+  transition: background-color 0.2s ease;
+}
+
+#root {
+  min-height: 100dvh;
+}
+
+/* animações de transição */
+.entry-animation {
+  animation-name: ease-entry;
+  animation-timing-function: ease;
+  animation-duration: 0.5s;
+  animation-fill-mode: forwards;
+}
+.entry-animation-2 {
+  animation-name: ease-entry;
+  animation-timing-function: ease;
+  animation-duration: 1s;
+  animation-fill-mode: forwards;
+}
+.entry-animation-3 {
+  animation-name: ease-entry;
+  animation-timing-function: ease;
+  animation-duration: 1.5s;
+  animation-fill-mode: forwards;
+}
+.entry-animation-4 {
+  animation-name: ease-entry;
+  animation-timing-function: ease;
+  animation-duration: 2s;
+  animation-fill-mode: forwards;
+}
+
+@keyframes ease-entry {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

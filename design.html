@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estuda Enem — protótipo</title>
+<script>
+  try {
+    var _t = localStorage.getItem('estudaenem_theme');
+    if (_t === 'light' || _t === 'dark') document.documentElement.setAttribute('data-theme', _t);
+  } catch (e) {}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #EDEBE3;
+    --paper-alt: #E3E0D3;
+    --paper-raised: #F5F3EC;
+    --ink: #201F1B;
+    --ink-soft: #5A574D;
+    --ink-faint: #8B876F;
+    --rule: #C7C1AE;
+    --stamp: #1F5E46;
+    --stamp-ink: #F5F3EC;
+    --stamp-soft: rgba(31,94,70,0.10);
+    --flag: #A03B2C;
+    --flag-soft: rgba(160,59,44,0.10);
+    --font-display: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+    --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+    --font-body: 'Work Sans', -apple-system, 'Segoe UI', sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #191815;
+      --paper-alt: #221F1A;
+      --paper-raised: #221F1A;
+      --ink: #ECE9E0;
+      --ink-soft: #B1AB9A;
+      --ink-faint: #7C776A;
+      --rule: #423E34;
+      --stamp: #4FAE83;
+      --stamp-ink: #12211B;
+      --stamp-soft: rgba(79,174,131,0.16);
+      --flag: #E07B63;
+      --flag-soft: rgba(224,123,99,0.14);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #191815;
+    --paper-alt: #221F1A;
+    --paper-raised: #221F1A;
+    --ink: #ECE9E0;
+    --ink-soft: #B1AB9A;
+    --ink-faint: #7C776A;
+    --rule: #423E34;
+    --stamp: #4FAE83;
+    --stamp-ink: #12211B;
+    --stamp-soft: rgba(79,174,131,0.16);
+    --flag: #E07B63;
+    --flag-soft: rgba(224,123,99,0.14);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .shell {
+    max-width: 720px;
+    margin: 0 auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+  }
+
+  /* ---------- topbar ---------- */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 0;
+  }
+
+  .wordmark {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .wordmark span {
+    color: var(--stamp);
+  }
+
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--ink-faint);
+    background: none;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  .theme-toggle:hover { color: var(--ink); border-color: var(--ink-faint); }
+  .theme-toggle:focus-visible { outline: 2px solid var(--stamp); outline-offset: 2px; }
+  .theme-toggle svg { width: 13px; height: 13px; flex: 0 0 auto; }
+
+  nav.tabs {
+    display: flex;
+    gap: 4px;
+    padding: 18px 24px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  nav.tabs button {
+    font-family: var(--font-body);
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--ink-faint);
+    background: none;
+    border: none;
+    padding: 10px 4px 14px;
+    margin-right: 22px;
+    cursor: pointer;
+    position: relative;
+  }
+
+  nav.tabs button[aria-selected="true"] {
+    color: var(--ink);
+  }
+
+  nav.tabs button[aria-selected="true"]::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: -1px;
+    height: 2px;
+    background: var(--stamp);
+  }
+
+  /* ---------- screens ---------- */
+  main { flex: 1; display: flex; flex-direction: column; }
+
+  .screen {
+    display: none;
+    padding: 40px 24px 56px;
+    animation: rise 0.4s ease;
+  }
+  .screen.active { display: block; }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .screen { animation: none; }
+  }
+
+  /* ---------- INÍCIO ---------- */
+  .hero {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    margin-bottom: 4px;
+  }
+
+  .hero-text { flex: 1 1 auto; min-width: 0; }
+
+  .hero-art {
+    flex: 0 0 auto;
+    width: 130px;
+    height: 108px;
+    color: var(--ink-faint);
+  }
+
+  @media (max-width: 560px) {
+    .hero { flex-direction: column-reverse; align-items: flex-start; gap: 16px; }
+    .hero-art { width: 108px; height: 90px; }
+  }
+
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(1.7rem, 4.4vw, 2.5rem);
+    line-height: 1.18;
+    font-weight: 600;
+    max-width: 15ch;
+    margin: 0 0 18px;
+  }
+
+  .hero p {
+    font-size: 1.02rem;
+    color: var(--ink-soft);
+    max-width: 46ch;
+    line-height: 1.6;
+    margin: 0 0 32px;
+  }
+
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 40px;
+  }
+
+  @media (max-width: 480px) {
+    .actions { grid-template-columns: 1fr; }
+  }
+
+  .action-card {
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 18px 18px 16px;
+    text-align: left;
+    background: var(--paper-raised);
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+  }
+  .action-card:hover { border-color: var(--stamp); }
+
+  .action-card .label {
+    display: block;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 6px;
+  }
+
+  .action-card .meta {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .section-title {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-faint);
+    margin: 0 0 14px;
+    font-weight: 600;
+  }
+
+  .areas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 40px;
+  }
+
+  .filter-row {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 36px;
+  }
+
+  @media (max-width: 480px) {
+    .filter-row { flex-direction: column; }
+  }
+
+  .select-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    flex: 1;
+  }
+
+  .field-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-faint);
+  }
+
+  .select-wrap { position: relative; }
+
+  .select-wrap::after {
+    content: "▾";
+    position: absolute;
+    right: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.68rem;
+    color: var(--ink-faint);
+    pointer-events: none;
+  }
+
+  .select-input {
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    background: var(--paper-raised);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 0.92rem;
+    padding: 11px 34px 11px 12px;
+    cursor: pointer;
+  }
+
+  .select-input:focus {
+    outline: none;
+    border-color: var(--stamp);
+  }
+
+  .select-input option[value="completa"] {
+    font-weight: 600;
+  }
+
+  .area-chip {
+    font-size: 0.86rem;
+    padding: 7px 13px;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    background: transparent;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+
+  .area-chip.on {
+    border-color: var(--stamp);
+    background: var(--stamp-soft);
+    color: var(--stamp);
+    font-weight: 500;
+  }
+
+  .stats-row {
+    display: flex;
+    gap: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .stat .num {
+    font-family: var(--font-mono);
+    font-size: 1.3rem;
+    display: block;
+  }
+  .stat .num.flag { color: var(--flag); }
+  .stat .num.stamp { color: var(--stamp); }
+
+  .stat .lbl {
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+  }
+
+  /* ---------- QUESTÃO ---------- */
+  .q-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .area-tag {
+    font-size: 0.78rem;
+    padding: 4px 10px;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    color: var(--ink-soft);
+  }
+
+  .q-count {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--ink-faint);
+  }
+
+  .mode-switch {
+    display: inline-flex;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+
+  .mode-switch button {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+    padding: 7px 12px;
+    background: none;
+    border: none;
+    color: var(--ink-faint);
+    cursor: pointer;
+  }
+
+  .mode-switch button + button { border-left: 1px solid var(--rule); }
+
+  .mode-switch button.on {
+    background: var(--stamp-soft);
+    color: var(--stamp);
+  }
+
+  /* ---------- estados vazios / de transição (compartilhado) ---------- */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+    padding: 44px 12px 34px;
+    color: var(--ink-soft);
+  }
+
+  .empty-state svg { color: var(--ink-faint); }
+
+  .empty-state h2 {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 4px 0 0;
+    max-width: 24ch;
+  }
+
+  .empty-state p {
+    font-size: 0.92rem;
+    line-height: 1.6;
+    max-width: 38ch;
+    margin: 0 0 6px;
+  }
+
+  .btn-outline {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 13px 22px;
+    background: none;
+    color: var(--ink);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  .btn-outline:hover { border-color: var(--ink-faint); }
+
+  /* ---------- QUESTÃO: estados (escolher / ativa / final) ---------- */
+  .q-active, .q-picker, .q-final { display: none; }
+  #questao.state-pick .q-picker { display: block; }
+  #questao.state-active .q-active { display: block; }
+  #questao.state-final .q-final { display: block; }
+
+  .q-nav {
+    margin-top: 32px;
+    padding-top: 22px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .q-nav-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(34px, 1fr));
+    gap: 6px;
+    max-height: 172px;
+    overflow-y: auto;
+    margin-bottom: 14px;
+    padding-right: 2px;
+  }
+
+  .nav-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 3px;
+    border: 1.5px solid var(--rule);
+    background: none;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .nav-btn:hover { border-color: var(--ink-faint); }
+
+  .nav-btn.correct {
+    background: var(--stamp-soft);
+    border-color: var(--stamp);
+    color: var(--stamp);
+  }
+
+  .nav-btn.wrong {
+    background: var(--flag-soft);
+    border-color: var(--flag);
+    color: var(--flag);
+  }
+
+  .nav-btn.current {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .q-nav-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 0.76rem;
+    color: var(--ink-faint);
+  }
+
+  .q-nav-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    border: 1.5px solid var(--rule);
+    display: inline-block;
+  }
+  .legend-dot.correct { background: var(--stamp-soft); border-color: var(--stamp); }
+  .legend-dot.wrong { background: var(--flag-soft); border-color: var(--flag); }
+  .legend-dot.current { border-color: var(--ink); }
+
+  .final-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+
+  /* ---------- HISTÓRICO: estado vazio ---------- */
+  .hist-empty-state { display: none; }
+  #historico.hist-empty .hist-content { display: none; }
+  #historico.hist-empty .hist-empty-state { display: block; }
+
+  .q-image {
+    border: 1px dashed var(--rule);
+    border-radius: 3px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    color: var(--ink-faint);
+    margin-bottom: 24px;
+    background: var(--paper-alt);
+  }
+
+  .q-image svg { opacity: 0.55; }
+  .q-image span { font-size: 0.78rem; font-family: var(--font-mono); }
+
+  .q-text {
+    font-size: 1.04rem;
+    line-height: 1.65;
+    margin: 0 0 28px;
+    max-width: 58ch;
+  }
+
+  /* enunciado sem texto: a questão em si é uma imagem */
+  .q-statement-image {
+    display: none;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    background: var(--paper-raised);
+    padding: 32px;
+    margin-bottom: 28px;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 220px;
+    color: var(--ink-faint);
+  }
+
+  .q-statement-image svg { opacity: 0.5; }
+
+  .q-statement-image span {
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+  }
+
+  #questao.img-mode .q-text { display: none; }
+  #questao.img-mode .q-statement-image { display: flex; }
+
+  .options { display: flex; flex-direction: column; gap: 2px; margin-bottom: 28px; }
+
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 6px;
+    border-bottom: 1px solid var(--rule);
+    cursor: pointer;
+    background: none;
+    border-left: none; border-right: none; border-top: none;
+    width: 100%;
+    text-align: left;
+    font-family: var(--font-body);
+  }
+
+  .bubble {
+    flex: 0 0 auto;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 1.5px solid var(--ink-faint);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .option-text {
+    font-size: 0.96rem;
+    color: var(--ink);
+  }
+
+  .option-thumb {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 84px;
+    height: 46px;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    background: var(--paper-alt);
+    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    flex: 0 0 auto;
+  }
+
+  #questao.img-mode .option-text { display: none; }
+  #questao.img-mode .option-thumb { display: flex; }
+
+  .option.selected .bubble {
+    background: var(--stamp);
+    border-color: var(--stamp);
+    color: var(--stamp-ink);
+  }
+
+  .option.selected .option-text { font-weight: 600; }
+  .option.selected .option-thumb { border-color: var(--stamp); }
+
+  .q-footer {
+    border-top: 1px solid var(--rule);
+    padding-top: 18px;
+  }
+
+  .progress-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+  }
+
+  .progress-row .remaining {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--flag);
+  }
+
+  .progress-track {
+    height: 4px;
+    background: var(--rule);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--stamp);
+    width: 27%;
+  }
+
+  .confirm-btn {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 13px 22px;
+    background: var(--stamp);
+    color: var(--stamp-ink);
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  .confirm-btn:hover { opacity: 0.92; }
+
+  .start-btn { margin-bottom: 40px; }
+
+  /* ---------- HISTÓRICO ---------- */
+  .hist-summary {
+    display: flex;
+    gap: 32px;
+    padding-bottom: 24px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .hist-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 22px;
+  }
+
+  .hist-list { border-top: 1px solid var(--rule); }
+
+  .hist-row {
+    display: grid;
+    grid-template-columns: 44px 1fr auto auto;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 4px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .hist-row .idx {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--ink-faint);
+  }
+
+  .hist-row .area {
+    font-size: 0.92rem;
+    color: var(--ink);
+  }
+
+  .hist-row .area small {
+    display: block;
+    font-size: 0.74rem;
+    color: var(--ink-faint);
+    margin-top: 2px;
+  }
+
+  .hist-status {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 1.5px solid var(--stamp);
+    flex: 0 0 auto;
+  }
+  .hist-status.correct { background: var(--stamp); }
+  .hist-status.wrong { border-color: var(--flag); background: none; position: relative; }
+  .hist-status.wrong::before, .hist-status.wrong::after {
+    content: "";
+    position: absolute;
+    left: 3px; right: 3px; top: 50%;
+    height: 1.5px;
+    background: var(--flag);
+  }
+  .hist-status.wrong::before { transform: translateY(-50%) rotate(45deg); }
+  .hist-status.wrong::after { transform: translateY(-50%) rotate(-45deg); }
+
+  .hist-date {
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    color: var(--ink-faint);
+  }
+
+  footer.note {
+    padding: 18px 24px 30px;
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+    border-top: 1px solid var(--rule);
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <div class="topbar">
+    <div class="wordmark">estuda<span>enem</span></div>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false">
+      <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"></svg>
+      <span id="themeLabel">claro</span>
+    </button>
+  </div>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-target="inicio">Início</button>
+    <button role="tab" aria-selected="false" data-target="questao">Questão</button>
+    <button role="tab" aria-selected="false" data-target="historico">Histórico</button>
+  </nav>
+
+  <main>
+
+    <!-- ===================== INÍCIO ===================== -->
+    <section class="screen active" id="inicio">
+      <div class="hero">
+        <div class="hero-text">
+          <h1>Revise o Enem questão por questão, no seu ritmo.</h1>
+          <p>Pratique com provas oficiais aplicadas em anos anteriores, filtre por área do conhecimento e acompanhe o que você já resolveu — tudo em um só lugar, sem distração.</p>
+        </div>
+        <svg class="hero-art" viewBox="0 0 220 190" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <g transform="rotate(-3 120 95)">
+            <rect x="55" y="15" width="130" height="160" rx="4" fill="var(--paper-raised)" stroke="var(--ink-faint)" stroke-width="1.4"/>
+            <line x1="70" y1="42" x2="170" y2="42" stroke="var(--rule)" stroke-width="1.4"/>
+            <line x1="70" y1="60" x2="150" y2="60" stroke="var(--rule)" stroke-width="1.4"/>
+            <line x1="70" y1="72" x2="160" y2="72" stroke="var(--rule)" stroke-width="1.4"/>
+            <line x1="70" y1="84" x2="140" y2="84" stroke="var(--rule)" stroke-width="1.4"/>
+            <circle cx="76" cy="108" r="6" stroke="var(--ink-faint)" stroke-width="1.4"/>
+            <circle cx="96" cy="108" r="6" fill="var(--stamp)" stroke="var(--stamp)"/>
+            <circle cx="116" cy="108" r="6" stroke="var(--ink-faint)" stroke-width="1.4"/>
+            <circle cx="136" cy="108" r="6" stroke="var(--ink-faint)" stroke-width="1.4"/>
+            <circle cx="156" cy="108" r="6" stroke="var(--ink-faint)" stroke-width="1.4"/>
+            <circle cx="76" cy="128" r="6" stroke="var(--ink-faint)" stroke-width="1.4"/>
+            <circle cx="96" cy="128" r="6" stroke="var(--ink-faint)" stroke-width="1.4"/>
+            <circle cx="116" cy="128" r="6" stroke="var(--ink-faint)" stroke-width="1.4"/>
+            <circle cx="136" cy="128" r="6" fill="var(--stamp)" stroke="var(--stamp)"/>
+            <circle cx="156" cy="128" r="6" stroke="var(--ink-faint)" stroke-width="1.4"/>
+          </g>
+          <g transform="rotate(34 60 150)">
+            <rect x="24" y="140" width="96" height="12" rx="6" fill="var(--paper)" stroke="var(--ink)" stroke-width="1.4"/>
+            <path d="M120 140 L136 146 L120 152 Z" fill="var(--ink)"/>
+            <rect x="20" y="141" width="9" height="10" fill="var(--stamp)"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="actions">
+        <button class="action-card">
+          <span class="label">Fazer uma prova completa</span>
+          <span class="meta">180 questões · 5h30</span>
+        </button>
+        <button class="action-card">
+          <span class="label">Praticar questões avulsas</span>
+          <span class="meta">escolha o tema e a quantidade</span>
+        </button>
+      </div>
+
+      <p class="section-title">Personalize sua sessão</p>
+      <div class="filter-row">
+        <div class="select-field">
+          <span class="field-label">Ano da prova</span>
+          <div class="select-wrap">
+            <select class="select-input">
+              <option>2024</option>
+              <option>2023</option>
+              <option>2022</option>
+              <option>2021</option>
+              <option>2020</option>
+              <option>2019</option>
+            </select>
+          </div>
+        </div>
+        <div class="select-field">
+          <span class="field-label">Disciplina</span>
+          <div class="select-wrap">
+            <select class="select-input">
+              <option>Linguagens</option>
+              <option>Matemática</option>
+              <option>Ciências humanas</option>
+              <option>Ciências da natureza</option>
+              <option>Redação</option>
+              <option value="completa">Prova completa (todas as disciplinas)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" class="confirm-btn start-btn">Iniciar prova</button>
+
+      <div class="stats-row">
+        <div class="stat"><span class="num stamp">312</span><span class="lbl">questões respondidas</span></div>
+        <div class="stat"><span class="num">74%</span><span class="lbl">de acerto</span></div>
+        <div class="stat"><span class="num flag">6</span><span class="lbl">dias seguidos estudando</span></div>
+      </div>
+    </section>
+
+    <!-- ===================== QUESTÃO ===================== -->
+    <section class="screen state-pick" id="questao">
+
+      <div class="mode-switch" id="questaoStateSwitch">
+        <button type="button" class="on" data-state="pick">escolher questões</button>
+        <button type="button" data-state="active">questão ativa</button>
+        <button type="button" data-state="final">resultado final</button>
+      </div>
+
+      <!-- ===== estado 1: nenhuma sessão escolhida ainda ===== -->
+      <div class="q-picker">
+        <div class="empty-state">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+            <path d="M4 6h16M4 12h16M4 18h9"></path>
+          </svg>
+          <h2>Primeiro, escolha as questões que você quer estudar</h2>
+          <p>Volte para o Início e selecione o ano da prova e a disciplina — ou opte pela prova completa — para começar a responder.</p>
+          <button type="button" class="confirm-btn" data-goto="inicio">Ir para o Início</button>
+        </div>
+      </div>
+
+      <!-- ===== estado 2: questão ativa ===== -->
+      <div class="q-active">
+      <div class="q-meta">
+        <span class="area-tag">Matemática</span>
+        <span class="q-count">questão 12 de 45</span>
+      </div>
+
+      <div class="mode-switch" id="enunciadoSwitch">
+        <button type="button" class="on" data-mode="texto">enunciado em texto</button>
+        <button type="button" data-mode="imagem">enunciado em imagem</button>
+      </div>
+
+      <div class="q-image">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+          <rect x="3" y="4" width="18" height="16" rx="1"></rect>
+          <circle cx="8.5" cy="9.5" r="1.5"></circle>
+          <path d="M21 16l-5.5-5.5L9 17"></path>
+        </svg>
+        <span>imagem da questão</span>
+      </div>
+
+      <p class="q-text">Um posto de combustível registrou, ao longo de uma semana, o volume de gasolina vendido por dia, representado no gráfico acima. Considerando a média diária de vendas, qual foi o volume total vendido durante os sete dias?</p>
+
+      <div class="q-statement-image">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+          <rect x="3" y="4" width="18" height="16" rx="1"></rect>
+          <circle cx="8.5" cy="9.5" r="1.5"></circle>
+          <path d="M21 16l-5.5-5.5L9 17"></path>
+        </svg>
+        <span>enunciado desta questão é apresentado como imagem</span>
+      </div>
+
+      <div class="options">
+        <button class="option">
+          <span class="bubble">A</span>
+          <span class="option-text">1.260 litros</span>
+          <span class="option-thumb">gráfico A</span>
+        </button>
+        <button class="option">
+          <span class="bubble">B</span>
+          <span class="option-text">1.480 litros</span>
+          <span class="option-thumb">gráfico B</span>
+        </button>
+        <button class="option selected">
+          <span class="bubble">C</span>
+          <span class="option-text">1.610 litros</span>
+          <span class="option-thumb">gráfico C</span>
+        </button>
+        <button class="option">
+          <span class="bubble">D</span>
+          <span class="option-text">1.750 litros</span>
+          <span class="option-thumb">gráfico D</span>
+        </button>
+        <button class="option">
+          <span class="bubble">E</span>
+          <span class="option-text">1.890 litros</span>
+          <span class="option-thumb">gráfico E</span>
+        </button>
+      </div>
+
+      <div class="q-footer">
+        <div class="progress-row">
+          <span class="section-title" style="margin:0;">Progresso da sessão</span>
+          <span class="remaining">faltam 33 questões</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill"></div></div>
+        <button class="confirm-btn">Confirmar resposta</button>
+      </div>
+
+      <div class="q-nav">
+        <p class="section-title">Suas questões</p>
+        <div class="q-nav-grid" id="qNavGrid"></div>
+        <div class="q-nav-legend">
+          <span><i class="legend-dot correct"></i>certa</span>
+          <span><i class="legend-dot wrong"></i>errada</span>
+          <span><i class="legend-dot"></i>não respondida</span>
+          <span><i class="legend-dot current"></i>atual</span>
+        </div>
+      </div>
+      </div>
+
+      <!-- ===== estado 3: prova finalizada ===== -->
+      <div class="q-final">
+        <div class="empty-state">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M8 12.5l2.5 2.5L16 9"></path>
+          </svg>
+          <h2>Prova concluída!</h2>
+          <p>Você respondeu todas as questões desta sessão. Veja como foi o seu desempenho.</p>
+        </div>
+        <div class="stats-row" style="justify-content:center; border-top:none; padding-top:0;">
+          <div class="stat"><span class="num">45</span><span class="lbl">questões</span></div>
+          <div class="stat"><span class="num stamp">34</span><span class="lbl">corretas</span></div>
+          <div class="stat"><span class="num flag">11</span><span class="lbl">incorretas</span></div>
+        </div>
+        <div class="final-actions">
+          <button type="button" class="confirm-btn" data-goto="historico">Ver histórico completo</button>
+          <button type="button" class="btn-outline" data-goto="inicio">Fazer outra prova</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== HISTÓRICO ===================== -->
+    <section class="screen" id="historico">
+
+      <div class="mode-switch" id="historicoStateSwitch">
+        <button type="button" class="on" data-state="cheio">com respostas</button>
+        <button type="button" data-state="vazio">vazio</button>
+      </div>
+
+      <div class="hist-content">
+        <div class="hist-summary">
+          <div class="stat"><span class="num stamp">312</span><span class="lbl">respondidas</span></div>
+          <div class="stat"><span class="num">231</span><span class="lbl">corretas</span></div>
+          <div class="stat"><span class="num flag">81</span><span class="lbl">incorretas</span></div>
+        </div>
+
+        <div class="hist-filters">
+          <button class="area-chip on">Todas</button>
+          <button class="area-chip">Linguagens</button>
+          <button class="area-chip">Matemática</button>
+          <button class="area-chip">Humanas</button>
+          <button class="area-chip">Natureza</button>
+        </div>
+
+        <div class="hist-list" id="histList"></div>
+      </div>
+
+      <div class="hist-empty-state">
+        <div class="empty-state">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+            <rect x="4" y="3" width="16" height="18" rx="1"></rect>
+            <path d="M8 8h8M8 12h8M8 16h5"></path>
+          </svg>
+          <h2>Seu histórico irá aparecer aqui</h2>
+          <p>Assim que você começar a responder questões, cada uma delas fica registrada aqui — com a área e se você acertou ou errou.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="note">Protótipo de design — estuda<span style="color:var(--stamp)">enem</span>.</footer>
+</div>
+
+<script>
+  // ---- tab switching ----
+  const tabs = document.querySelectorAll('nav.tabs button');
+  const screens = document.querySelectorAll('.screen');
+
+  function activate(target) {
+    tabs.forEach(t => t.setAttribute('aria-selected', t.dataset.target === target ? 'true' : 'false'));
+    screens.forEach(s => s.classList.toggle('active', s.id === target));
+    try { localStorage.setItem('estudaenem_tab', target); } catch (e) {}
+  }
+
+  tabs.forEach(t => t.addEventListener('click', () => activate(t.dataset.target)));
+
+  // ---- estados da tela Questão (escolher / ativa / final) ----
+  const questaoSection = document.getElementById('questao');
+  const questaoStateSwitch = document.getElementById('questaoStateSwitch');
+
+  function setQuestaoState(state) {
+    questaoSection.classList.remove('state-pick', 'state-active', 'state-final');
+    questaoSection.classList.add('state-' + state);
+    questaoStateSwitch.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.state === state));
+  }
+
+  questaoStateSwitch.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => setQuestaoState(btn.dataset.state));
+  });
+
+  const startBtn = document.querySelector('.start-btn');
+  if (startBtn) startBtn.addEventListener('click', () => {
+    activate('questao');
+    setQuestaoState('active');
+  });
+
+  // ---- estado do Histórico (com respostas / vazio) ----
+  const historicoSection = document.getElementById('historico');
+  const historicoStateSwitch = document.getElementById('historicoStateSwitch');
+  historicoStateSwitch.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      historicoStateSwitch.querySelectorAll('button').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      historicoSection.classList.toggle('hist-empty', btn.dataset.state === 'vazio');
+    });
+  });
+
+  // ---- botões "data-goto" (empty states e tela final) ----
+  document.querySelectorAll('[data-goto]').forEach(btn => {
+    btn.addEventListener('click', () => activate(btn.dataset.goto));
+  });
+
+  let initialTab = 'inicio';
+  try {
+    const saved = localStorage.getItem('estudaenem_tab');
+    if (saved && document.getElementById(saved)) initialTab = saved;
+  } catch (e) {}
+  activate(initialTab);
+
+  // ---- alternância enunciado texto/imagem ----
+  const questaoScreen = document.getElementById('questao');
+  document.querySelectorAll('#enunciadoSwitch button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#enunciadoSwitch button').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      questaoScreen.classList.toggle('img-mode', btn.dataset.mode === 'imagem');
+    });
+  });
+
+  // ---- option select (question screen) ----
+  document.querySelectorAll('.options .option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      opt.parentElement.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+    });
+  });
+
+  // ---- area chip toggle ----
+  document.querySelectorAll('.area-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const group = chip.parentElement;
+      group.querySelectorAll('.area-chip').forEach(c => c.classList.remove('on'));
+      chip.classList.add('on');
+    });
+  });
+
+  // ---- theme toggle ----
+  const themeBtn = document.getElementById('themeToggle');
+  const themeIcon = document.getElementById('themeIcon');
+  const themeLabel = document.getElementById('themeLabel');
+
+  const sunPath = '<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+  const moonPath = '<path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>';
+
+  function effectiveTheme() {
+    const attr = document.documentElement.getAttribute('data-theme');
+    if (attr === 'light' || attr === 'dark') return attr;
+    return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+  }
+
+  function reflectTheme(theme) {
+    themeIcon.innerHTML = theme === 'dark' ? sunPath : moonPath;
+    themeLabel.textContent = theme === 'dark' ? 'claro' : 'escuro';
+    themeBtn.setAttribute('aria-pressed', String(theme === 'dark'));
+    themeBtn.setAttribute('title', theme === 'dark' ? 'Mudar para modo claro' : 'Mudar para modo escuro');
+  }
+
+  reflectTheme(effectiveTheme());
+
+  themeBtn.addEventListener('click', () => {
+    const next = effectiveTheme() === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('estudaenem_theme', next); } catch (e) {}
+    reflectTheme(next);
+  });
+
+  if (window.matchMedia) {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+      if (!document.documentElement.getAttribute('data-theme')) reflectTheme(effectiveTheme());
+    });
+  }
+
+  // ---- grid de navegação entre questões ----
+  const qNavGrid = document.getElementById('qNavGrid');
+  const qCount = document.querySelector('#questao .q-count');
+  const totalQuestoes = 45;
+  const questaoAtualInicial = 12;
+  const statusPorQuestao = { 1:'correct', 2:'wrong', 3:'correct', 4:'correct', 5:'wrong', 6:'correct', 7:'correct', 8:'wrong', 9:'correct', 10:'correct', 11:'wrong' };
+
+  for (let n = 1; n <= totalQuestoes; n++) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'nav-btn';
+    b.textContent = String(n).padStart(2, '0');
+    if (n === questaoAtualInicial) b.classList.add('current');
+    else if (statusPorQuestao[n]) b.classList.add(statusPorQuestao[n]);
+    b.addEventListener('click', () => {
+      qNavGrid.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('current'));
+      b.classList.add('current');
+      if (qCount) qCount.textContent = 'questão ' + n + ' de ' + totalQuestoes;
+    });
+    qNavGrid.appendChild(b);
+  }
+
+  // ---- render história list ----
+  const areas = ['Linguagens', 'Matemática', 'Humanas', 'Natureza'];
+  const histData = [
+    [145, 'Linguagens', 'Interpretação de texto — crônica', true, '09 set'],
+    [144, 'Matemática', 'Funções e gráficos', false, '09 set'],
+    [143, 'Humanas', 'Geografia urbana', true, '08 set'],
+    [142, 'Natureza', 'Biologia celular', true, '08 set'],
+    [141, 'Linguagens', 'Figuras de linguagem', true, '07 set'],
+    [140, 'Matemática', 'Geometria espacial', false, '07 set'],
+    [139, 'Humanas', 'História do Brasil república', true, '06 set'],
+    [138, 'Natureza', 'Química orgânica', true, '06 set'],
+  ];
+
+  const list = document.getElementById('histList');
+  histData.forEach(([n, area, title, correct, date]) => {
+    const row = document.createElement('div');
+    row.className = 'hist-row';
+    row.innerHTML = `
+      <span class="idx">${String(n).padStart(3,'0')}</span>
+      <span class="area">${title}<small>${area}</small></span>
+      <span class="hist-status ${correct ? 'correct' : 'wrong'}"></span>
+      <span class="hist-date">${date}</span>
+    `;
+    list.appendChild(row);
+  });
+</script>
+
+</body>
+</html>
