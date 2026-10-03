@@ -1,8 +1,11 @@
 import { create } from "zustand";
+import type { Opts } from "../components/Configuracoes";
 
 interface QuestionsState {
   questions: Question[] | null;
+  localOpts: Opts;
   setQuestions: (value: Question[] | null) => void;
+  setLocalOpts: (value: Opts) => void;
 }
 
 export interface Question {
@@ -28,5 +31,7 @@ interface Alternative {
 
 export const useQuestions = create<QuestionsState>((set) => ({
   questions: null,
+  localOpts: { cronometrada: false, instantaneo: false },
+  setLocalOpts: (data) => set({ localOpts: data }),
   setQuestions: (data) => set({ questions: data }),
 }));

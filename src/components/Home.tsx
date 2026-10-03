@@ -1,22 +1,26 @@
 import { TypeAnimation } from "react-type-animation";
 import { NavLink, useNavigate } from "react-router-dom";
 import QuestaoCard from "./QuestaoCard";
+import Configuracoes from "./Configuracoes";
 import { useEffect, useRef, useState } from "react";
 import { useHistorico } from "../stores/historicoStore";
 import { useQuestions } from "../stores/questionsStore";
 import type { Question } from "../stores/questionsStore";
+import type { Opts } from "./Configuracoes";
 
 export default function Home() {
   const navigate = useNavigate();
   const setQuestions = useQuestions((state) => state.setQuestions);
+  const setLocalOpts = useQuestions((state) => state.setLocalOpts);
   const historico = useHistorico((state) => state.historico);
   const [ano, setAno] = useState<string>("2020");
   const [disciplina, setDisciplina] = useState("matematica");
   const [config, setConfig] = useState(false);
-  const [opts, setOpts] = useState({
+  const [opts, setOpts] = useState<Opts>({
     /* ainda implementar funcao cronometrada */
     cronometrada: false,
     embaralhada: false,
+    instantaneo: false,
   });
   const configTab = useRef<HTMLDivElement>(null);
 
@@ -66,6 +70,15 @@ export default function Home() {
       window.alert("Algo deu errado. Tente novamente mais tarde.");
     }
   }
+
+  useEffect(() => {
+    if (opts) {
+      setLocalOpts({
+        cronometrada: opts.cronometrada,
+        instantaneo: opts.instantaneo,
+      });
+    }
+  }, [opts]);
 
   return (
     <div>
@@ -210,68 +223,7 @@ export default function Home() {
 
           {/* dropdown de opcoes */}
           {config && (
-            <div
-              ref={configTab}
-              className="entry-animation border border-rule bg-paper-raised flex flex-col p-3 gap-2 absolute top-full mt-2 z-10"
-            >
-              <div className="font-body text-[0.9rem] text-ink-soft flex items-center gap-3 group">
-                {/* switch embaralhado */}
-                <div className="peer has-checked:before:right-1 before:right-6.5 before:transition-all opacity-60 has-checked:opacity-100 border border-ink-soft h-7 w-13 rounded-2xl bg-paper relative before:content-[''] before:bg-ink-soft before:h-5 before:w-5 before:absolute before:rounded-full before:top-1/2 before:-translate-y-1/2 transition">
-                  <input
-                    checked={opts.embaralhada}
-                    onChange={() =>
-                      setOpts((prev) => ({
-                        ...prev,
-                        embaralhada: !prev.embaralhada,
-                      }))
-                    }
-                    type="checkbox"
-                    name="embaralhadas"
-                    id="embaralhadas"
-                    className="opacity-0"
-                  />
-                  <label
-                    className="absolute w-full h-full hover:cursor-pointer"
-                    htmlFor="embaralhadas"
-                  ></label>
-                </div>
-                <label
-                  htmlFor="embaralhadas"
-                  className="peer-has-checked:text-ink!"
-                >
-                  Questões embaralhadas
-                </label>
-              </div>
-
-              <div className="font-body text-[0.9rem] text-ink-soft flex items-center gap-3">
-                {/* switch embaralhado */}
-                <div className="peer has-checked:before:right-1 before:right-6.5 before:transition-all opacity-60 has-checked:opacity-100 border border-ink-soft h-7 w-13 rounded-2xl bg-paper relative before:content-[''] before:bg-ink-soft before:h-5 before:w-5 before:absolute before:rounded-full before:top-1/2 before:-translate-y-1/2 transition">
-                  <input
-                    checked={opts.cronometrada}
-                    onChange={() =>
-                      setOpts((prev) => ({
-                        ...prev,
-                        cronometrada: !prev.cronometrada,
-                      }))
-                    }
-                    type="checkbox"
-                    name="cronometro"
-                    id="cronometro"
-                    className="opacity-0"
-                  />
-                  <label
-                    className="absolute w-full h-full hover:cursor-pointer"
-                    htmlFor="cronometro"
-                  ></label>
-                </div>
-                <label
-                  htmlFor="cronometro"
-                  className="peer-has-checked:text-ink!"
-                >
-                  Questões cronometradas
-                </label>
-              </div>
-            </div>
+            <Configuracoes opts={opts} setOpts={setOpts} ref={configTab} />
           )}
         </div>
       </div>

@@ -69,7 +69,7 @@ export default function Historico() {
 
   useEffect(() => {
     if (limparHist === 2) {
-      localStorage.clear();
+      localStorage.removeItem("historico");
       window.location.reload();
     }
   }, [limparHist]);

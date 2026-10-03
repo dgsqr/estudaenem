@@ -18,6 +18,7 @@ interface Situacao {
 export default function Questions() {
   const questions = useQuestions((state) => state.questions);
   const setQuestions = useQuestions((state) => state.setQuestions);
+  const localOpts = useQuestions((state) => state.localOpts);
   const setLocalHistorico = useHistorico((state) => state.setHistorico);
 
   const [questao, setQuestao] = useState<Question | null>(null);
@@ -43,7 +44,7 @@ export default function Questions() {
     } else if (disc === "linguagens") {
       return "Linguagens";
     } else {
-      return;
+      return disc;
     }
   }
 
@@ -249,7 +250,7 @@ export default function Questions() {
 
                       setIndex(key);
                     }}
-                    className={`border border-rule rounded-sm h-10 w-10 flex justify-center items-center text-ink-faint font-mono text-[0.8rem] not-disabled:cursor-pointer ${index === key && "outline-2 outline-ink border-ink!"} ${situacao[key]?.correta === "incorreta" && "border-flag! text-flag!"} ${situacao[key]?.correta === "correta" && "border-stamp! text-stamp!"}`}
+                    className={`opacity-40 ${situacao[key]?.feita && "opacity-100!"} border border-rule rounded-sm h-10 w-10 flex justify-center items-center text-ink-faint font-mono text-[0.8rem] not-disabled:cursor-pointer ${index === key && "outline-2 outline-ink border-ink!"} ${localOpts.instantaneo && situacao[key]?.correta === "incorreta" && "border-flag! text-flag!"} ${localOpts.instantaneo && situacao[key]?.correta === "correta" && "border-stamp! text-stamp!"}`}
                   >
                     <p>{qst.title.slice(0, 11).replace(/\D/g, "")}</p>
                   </button>
