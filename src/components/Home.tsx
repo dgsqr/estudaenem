@@ -12,6 +12,7 @@ export default function Home() {
   const navigate = useNavigate();
   const setQuestions = useQuestions((state) => state.setQuestions);
   const setLocalOpts = useQuestions((state) => state.setLocalOpts);
+  const cachedOpts = useQuestions((state) => state.localOpts);
   const historico = useHistorico((state) => state.historico);
   const [ano, setAno] = useState<string>("2020");
   const [disciplina, setDisciplina] = useState("matematica");
@@ -32,6 +33,10 @@ export default function Home() {
     }
 
     document.addEventListener("mousedown", handleConfig);
+
+    if (cachedOpts) {
+      setOpts(cachedOpts);
+    }
 
     return () => {
       document.removeEventListener("mousedown", handleConfig);
@@ -76,9 +81,19 @@ export default function Home() {
       setLocalOpts({
         cronometrada: opts.cronometrada,
         instantaneo: opts.instantaneo,
+        embaralhada: opts.embaralhada,
       });
     }
+
+    localStorage.setItem("localOpts", JSON.stringify(opts));
   }, [opts]);
+
+  useEffect(() => {
+    /* desativa o cronometro caso a opção nao seja de prova completa */
+    if (disciplina !== "completa") {
+      setOpts((prev) => ({ ...prev, cronometrada: false }));
+    }
+  }, [disciplina]);
 
   return (
     <div>
@@ -223,7 +238,12 @@ export default function Home() {
 
           {/* dropdown de opcoes */}
           {config && (
-            <Configuracoes opts={opts} setOpts={setOpts} ref={configTab} />
+            <Configuracoes
+              opts={opts}
+              setOpts={setOpts}
+              ref={configTab}
+              disciplina={disciplina}
+            />
           )}
         </div>
       </div>

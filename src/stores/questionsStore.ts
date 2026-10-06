@@ -29,9 +29,13 @@ interface Alternative {
   isCorrect: boolean;
 }
 
+let cachedOpts = localStorage.getItem("localOpts");
+
 export const useQuestions = create<QuestionsState>((set) => ({
   questions: null,
-  localOpts: { cronometrada: false, instantaneo: false },
+  localOpts: cachedOpts
+    ? JSON.parse(cachedOpts)
+    : { cronometrada: false, instantaneo: false },
   setLocalOpts: (data) => set({ localOpts: data }),
   setQuestions: (data) => set({ questions: data }),
 }));

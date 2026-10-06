@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Alternativa from "./Alternativa";
 import ImagemFullscreen from "./ImagemFullscreen";
 import EmptyQuestions from "./EmptyQuestions";
+import Timer from "./Timer";
 import ProvaConcluida from "./ProvaConcluida";
 import { useQuestions } from "../stores/questionsStore";
 import { useHistorico } from "../stores/historicoStore";
@@ -28,6 +29,8 @@ export default function Questions() {
   const [alternativa, setAlternativa] = useState<string>("");
   const [situacao, setSituacao] = useState<Situacao[]>([]);
   const [historico, setHistorico] = useState<Historico[]>([]);
+
+  const [provaFinalizada, setProvaFinalizada] = useState<boolean>(false);
 
   const [suasQuestoesDropdown, setSuasQuestoesDropdown] = useState(false);
 
@@ -90,6 +93,12 @@ export default function Questions() {
   }
 
   useEffect(() => {
+    if (!questions) return;
+
+    if (provaFinalizada) setIndex(questions?.length);
+  }, [provaFinalizada]);
+
+  useEffect(() => {
     if (historico.length > 0) {
       setLocalHistorico(historico);
     }
@@ -145,6 +154,10 @@ export default function Questions() {
               <p className="border border-rule px-4 py-1 ">
                 {questao && disciplinaFormatada(questao.discipline)}
               </p>
+
+              {localOpts.cronometrada && (
+                <Timer finalizada={setProvaFinalizada} />
+              )}
 
               <p>
                 questão {index + 1} de{" "}
