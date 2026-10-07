@@ -16,6 +16,12 @@ interface Situacao {
   alt: string;
 }
 
+export interface SituacaoPorDisciplina {
+  disciplina: string;
+  titulo: string;
+  correta: string;
+}
+
 export default function Questions() {
   const questions = useQuestions((state) => state.questions);
   const setQuestions = useQuestions((state) => state.setQuestions);
@@ -28,6 +34,9 @@ export default function Questions() {
   const [imagemFull, setImagemFull] = useState(false);
   const [alternativa, setAlternativa] = useState<string>("");
   const [situacao, setSituacao] = useState<Situacao[]>([]);
+  const [situacaoPorDisciplina, setSituacaoPorDisciplina] = useState<
+    SituacaoPorDisciplina[]
+  >([]);
   const [historico, setHistorico] = useState<Historico[]>([]);
 
   const [provaFinalizada, setProvaFinalizada] = useState<boolean>(false);
@@ -79,6 +88,15 @@ export default function Questions() {
           alt: alternativa,
         },
       ]);
+
+      setSituacaoPorDisciplina((prev) => [
+        ...prev,
+        {
+          disciplina: questao.discipline,
+          titulo: questao.title,
+          correta: "correta",
+        },
+      ]);
     } else {
       setSituacao((prev) => [
         ...prev,
@@ -87,6 +105,15 @@ export default function Questions() {
           feita: true,
           correta: "incorreta",
           alt: alternativa,
+        },
+      ]);
+
+      setSituacaoPorDisciplina((prev) => [
+        ...prev,
+        {
+          disciplina: questao.discipline,
+          titulo: questao.title,
+          correta: "incorreta",
         },
       ]);
     }
@@ -140,6 +167,7 @@ export default function Questions() {
               situacao.filter((sit) => sit.correta === "incorreta").length
             }
             total={situacao.length}
+            situacaoPorDisciplina={situacaoPorDisciplina}
           />
         ) : (
           <>

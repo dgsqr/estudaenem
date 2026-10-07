@@ -27,7 +27,7 @@ export default function Configuracoes({
         className="font-body text-[0.9rem] text-ink-soft flex items-center gap-3 group"
       >
         {/* switch embaralhado */}
-        <div className="peer has-checked:before:right-1 before:right-6.5 before:transition-all opacity-60 has-checked:opacity-100 border border-ink-soft h-7 w-13 rounded-2xl bg-paper relative before:content-[''] before:bg-ink-soft before:h-5 before:w-5 before:absolute before:rounded-full before:top-1/2 before:-translate-y-1/2 transition">
+        <div className="shrink-0 peer has-checked:before:right-1 before:right-6.5 before:transition-all opacity-60 has-checked:opacity-100 border border-ink-soft h-7 w-13 rounded-2xl bg-paper relative before:content-[''] before:bg-ink-soft before:h-5 before:w-5 before:absolute before:rounded-full before:top-1/2 before:-translate-y-1/2 transition">
           <input
             checked={opts.embaralhada}
             onChange={() =>
@@ -59,7 +59,7 @@ export default function Configuracoes({
         className="font-body text-[0.9rem] text-ink-soft flex items-center gap-3 relative"
       >
         {/* switch resultado instantaneo */}
-        <div className="peer has-checked:before:right-1 before:right-6.5 before:transition-all opacity-60 has-checked:opacity-100 border border-ink-soft h-7 w-13 rounded-2xl bg-paper relative before:content-[''] before:bg-ink-soft before:h-5 before:w-5 before:absolute before:rounded-full before:top-1/2 before:-translate-y-1/2 transition">
+        <div className="shrink-0 peer has-checked:before:right-1 before:right-6.5 before:transition-all opacity-60 has-checked:opacity-100 border border-ink-soft h-7 w-13 rounded-2xl bg-paper relative before:content-[''] before:bg-ink-soft before:h-5 before:w-5 before:absolute before:rounded-full before:top-1/2 before:-translate-y-1/2 transition">
           <input
             checked={opts.instantaneo}
             onChange={() =>
@@ -92,7 +92,7 @@ export default function Configuracoes({
           className="font-body text-[0.9rem] text-ink-soft flex items-center gap-3 relative"
         >
           {/* switch cronometro */}
-          <div className="peer has-checked:before:right-1 before:right-6.5 before:transition-all opacity-60 has-checked:opacity-100 border border-ink-soft h-7 w-13 rounded-2xl bg-paper relative before:content-[''] before:bg-ink-soft before:h-5 before:w-5 before:absolute before:rounded-full before:top-1/2 before:-translate-y-1/2 transition">
+          <div className="shrink-0 peer has-checked:before:right-1 before:right-6.5 before:transition-all opacity-60 has-checked:opacity-100 border border-ink-soft h-7 w-13 rounded-2xl bg-paper relative before:content-[''] before:bg-ink-soft before:h-5 before:w-5 before:absolute before:rounded-full before:top-1/2 before:-translate-y-1/2 transition">
             <input
               checked={opts.cronometrada}
               onChange={() =>
